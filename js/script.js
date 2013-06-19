@@ -1,3 +1,9 @@
+/*
+   TASKS
+   - set background to black
+   - create particle system
+   - get stuff to explode
+   */
 window.requestAnimFrame = (function(){
     return  window.requestAnimationFrame       || 
         window.webkitRequestAnimationFrame || 
@@ -11,89 +17,131 @@ window.requestAnimFrame = (function(){
 
 
 ( function() {
-    console.log('running script');
-    var
-    width= 500,
-    height= 500,
-    renderer= new THREE.WebGLRenderer(),
-    scene = new THREE.Scene(),
-    $canvas = $('#canvas'),
-    cameraProperty = {
-        view_angle: 45,
-        aspect: width/height,
-        near: 0.1,
-        far: 10000
-    },
-    camera = new THREE.Camera(
-        cameraProperty.view_angle,
-        cameraProperty.aspect,
-        cameraProperty.near,
-        cameraProperty.far
-    )
-    //    geometry = new THREE.Geometry()
-    ;
-    var
-    particles = new THREE.Geometry(),
-    pMaterial = new THREE.ParticleBasicMaterial({
-        color: 0xFFFFFF,
-        size: 20,
-        map: THREE.ImageUtils.loadTexture(
-            "images/particle.png"
-        ),
-        blending: THREE.AdditiveBlending,
-        transparent: true
-    }),
-    particleSystem = new THREE.ParticleSystem(particles, pMaterial),
-    count = 1
-    ;
-    for(var p = 0; p < count; p++) {
 
-        // create a particle with random
-        // position values, -250 -> 250
-        var pX = Math.random() * 500 - 250,
-        pY = Math.random() * 500 - 250,
-        pZ = Math.random() * 500 - 250,
-        particle = new THREE.Vertex(
-            new THREE.Vector3(pX, pY, pZ)
-        );
-        // create a velocity vector
-        particle.velocity = new THREE.Vector3(
-            0,				// x
-            -Math.random(),	// y
-            0);				// z
+        //set up particles
+        var 
+        particleCount = 100,
+        particleGeometry = new THREE.Geometry(),
+        particleMaterial = new THREE.ParticleBasicMaterial({
+            color: 0xFFFFFF,
+            size: 20,
+            map: THREE.ImageUtils.loadTexture(
+                "/images/particle.png"
+            ),
+            blending: THREE.AdditiveBlending,
+            transparent: true
+        });
 
-            // add it to the geometry
-            particles.vertices.push(particle);
+    var container;
+
+    var camera, controls, scene, renderer;
+
+
+    init();
+    animate();
+
+    function init() {
+
+        camera = new THREE.PerspectiveCamera( 60, window.innerWidth / window.innerHeight, 1, 1000 );
+        camera.position.z = 500;
+
+        controls = new THREE.OrbitControls( camera );
+        controls.addEventListener( 'change', render );
+
+        scene = new THREE.Scene();
+        //scene.fog = new THREE.FogExp2( 0xcccccc, 0.002 );
+
+
+				for ( i = 0; i < particleCount; i ++ ) {
+
+					var vertex = new THREE.Vector3();
+                    vertex.x = Math.random() * 1000 - 500;
+                    vertex.y = Math.random() * 1000 - 500;
+                    vertex.z = Math.random() * 1000 - 500;
+
+					particleGeometry.vertices.push( vertex );
+
+				}
+
+        particles = new THREE.ParticleSystem( particleGeometry, particleMaterial );
+
+scene.add(particles);
+console.log(particles.geometry.vertices);
+        //var geometry = new THREE.CylinderGeometry( 0, 10, 30, 4, 1 );
+        //var material =  new THREE.MeshLambertMaterial( { color:0xffffff, shading: THREE.FlatShading } );
+
+        //for ( var i = 0; i < 500; i ++ ) {
+
+        //var mesh = new THREE.Mesh( geometry, material );
+        //mesh.position.x = ( Math.random() - 0.5 ) * 1000;
+        //mesh.position.y = ( Math.random() - 0.5 ) * 1000;
+        //mesh.position.z = ( Math.random() - 0.5 ) * 1000;
+        //mesh.updateMatrix();
+        //mesh.matrixAutoUpdate = false;
+        //scene.add( mesh );
+
+        //}
+
+
+        // lights
+
+        //light = new THREE.DirectionalLight( 0xffffff );
+        //light.position.set( 1, 1, 1 );
+        //scene.add( light );
+
+        //light = new THREE.DirectionalLight( 0x002288 );
+        //light.position.set( -1, -1, -1 );
+        //scene.add( light );
+
+        //light = new THREE.AmbientLight( 0x222222 );
+        //scene.add( light );
+
+
+        // renderer
+
+        renderer = new THREE.WebGLRenderer( { antialias: false } );
+        //renderer.setClearColor( scene.fog.color, 1 );
+        renderer.setSize( window.innerWidth, window.innerHeight );
+
+        container = document.getElementById( 'canvas' );
+        container.appendChild( renderer.domElement );
+
+
+        //
+
+        window.addEventListener( 'resize', onWindowResize, false );
+
     }
 
+    function onWindowResize() {
 
-    function setup(){
-        console.log('setting up canvas');
-        //bring camera back
-        camera.position.z = 300;
+        camera.aspect = window.innerWidth / window.innerHeight;
+        camera.updateProjectionMatrix();
 
-        // start the renderer - set the clear colour
-        // to a full black
-        renderer.setClearColor(new THREE.Color(0, 1));
-        renderer.setSize(width, height);
-
-        // attach the render-supplied DOM element
-        $canvas.append(renderer.domElement);
-
-    }
-    function render(){
-        console.log('rendering');
-        scene.add(particleSystem);
-
-    }
-    function animate() {
-
-        //requestAnimationFrame( animate );
+        renderer.setSize( window.innerWidth, window.innerHeight );
 
         render();
 
     }
-    setup();
-    animate();
+
+    function animate() {
+particles.geometry.vertices
+
+for (var i = 0; i < particles.geometry.vertices.length; i += 1) {
+
+console.log(particles.geometry.vertices[i]);   
+}
+				
+
+        requestAnimationFrame( animate );
+        controls.update();
+
+    }
+
+    function render() {
+
+        renderer.render( scene, camera );
+
+    }
 
 }());
